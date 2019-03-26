@@ -8,6 +8,7 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
     <title>Widget Page!</title>
   </head>
@@ -27,6 +28,9 @@
     .card{
         max-width: 500px;
         margin: 20px;
+    }
+    .statusIcon{
+      margin: 15px 0px 0px -10px;
     }
     </style>
     
@@ -131,17 +135,58 @@
             button.innerText = "Wake";
             button.href = "#";
 
+            var ip = document.createElement("span");
+            ip.classList.add("computer-ip");
+            ip.innerText = computersFileData[comp]["ip"];
+            ip.style.display = "none";
+
+            var statusIcon = document.createElement("span");
+            statusIcon.classList.add("statusIcon", "fa", "fa-moon-o", "fa-2x");
+
+            var leftcol = document.createElement("div");
+            leftcol.classList.add("col-1");
+
+            leftcol.appendChild(statusIcon);
+
+            var midcol = document.createElement("div");
+            midcol.classList.add("col-8");
+
+            midcol.appendChild(title);
+            midcol.appendChild(text);
+            midcol.appendChild(ip);
+
+
+            var rightcol = document.createElement("div");
+            rightcol.classList.add("col-3");
+
+            rightcol.appendChild(button);
+
+            var row = document.createElement("div");
+            row.classList.add("row");
+
+            row.appendChild(leftcol);
+            row.appendChild(midcol);
+            row.appendChild(rightcol);
+
+            var container = document.createElement("div");
+            container.classList.add("container");
+
+            container.appendChild(row);
+
             var cardBody = document.createElement("div");
             cardBody.classList.add("card-body");
 
-            cardBody.appendChild(title);
-            cardBody.appendChild(text);
-            cardBody.appendChild(button);
+
+
+            cardBody.appendChild(container);
+            
 
             var card = document.createElement("div");
             card.classList.add("card");
             
             card.appendChild(cardBody);
+
+            console.log(card);
 
             cards.appendChild(card);
 
@@ -149,6 +194,18 @@
         
 
     }
+
+    checkComputerStatus();
+    function checkComputerStatus(){
+      
+      var cards = document.getElementsByClassName("card");
+
+      console.log(cards);
+
+
+
+    }
+
 
     function saveComputers() {
         //   alert("The form was submitted");
