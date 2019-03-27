@@ -1,0 +1,123 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+    <title>WoL Server</title>
+  </head>
+  <body>
+    <h1>WoL Server</h1>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    
+    <style>
+    #newComputerForm{
+        max-width: 500px;
+        margin:20px;
+    }
+    .card{
+        max-width: 500px;
+        margin: 20px;
+    }
+    .statusIcon{
+      margin: 15px 0px 0px -10px;
+    }
+
+    .cardButton{
+        margin-top:13px;
+    }
+
+    </style>
+    
+    
+    <form id="newComputerForm" action="/" method="post">
+      <div class="form-group row">
+        <label for="colFormLabel" class="col-sm-4 col-form-label">Computer Name</label>
+        <div class="col-sm-8">
+          <input type="text" class="form-control" name="computerNameFormField" placeholder="JOHN-DESKTOP">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="colFormLabel" class="col-sm-4 col-form-label">Computer IP Address</label>
+        <div class="col-sm-8">
+          <input type="text" class="form-control" name="computerIPFormField" placeholder="192.168.1.43">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="colFormLabel" class="col-sm-4 col-form-label">Computer MAC Address</label>
+        <div class="col-sm-8">
+          <input type="text" class="form-control" name="computerMACFormField" placeholder="00-14-22-01-23-45">
+        </div>
+      </div>
+      <input value = "newComputerForm" type="hidden" name="form_id">
+      <button type="submit" class="btn btn-primary">Save Computers</button>
+    </form>
+    
+    <div id="cards">
+        {% for comp in computers %}
+        <div class="card">
+            <div class="card-body">
+                <div class="container">
+                    <div class="row"> 
+                        <div class="col-1">
+                            <span class="statusIcon fa fa-moon-o fa-2x"></span>
+                            <span class="computer-ip" style="display: none;">{{ comp["ip"] }}</span>
+                            <span class="isAlive" style="display: none;">{{ comp["ip"] }}</span>
+
+
+                        </div>
+                        <div class="col-6">
+                            <h5 class="card-title">{{ comp["name"] }}</h5>
+                            <p class="card-text">{{ comp["mac"] }}</p>
+                        </div>
+                        <div class="col-5">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-6">
+
+                                        <form id="wakeComputerForm" action="/" method="post">
+                                            <input value = "{{ comp['mac'] }}" type="hidden" name="computerMACFormField">
+                                            <input value = "deleteComputer" type="hidden" name="form_id">
+                                            <button type="submit" class="cardButton btn btn-primary">Wake</button>
+                                        </form>
+
+                                    </div>
+                                    <div class="col-6">
+
+                                        <form id="deleteComputerForm" action="/" method="post">
+                                            <input value = "{{ comp['mac'] }}" type="hidden" name="computerMACFormField">
+                                            <input value = "deleteComputer" type="hidden" name="form_id">
+                                            <button type="submit" class="cardButton btn btn-danger">Delete</button>
+                                        </form>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <script>
+    </script>
+    
+  </body>
+</html>
