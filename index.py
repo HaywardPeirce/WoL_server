@@ -93,7 +93,10 @@ def deleteComputer(computersFileData, newComputerFormData):
     except IOError:
       print("Error: File does not appear to exist.")
 
+def wakeComputer(computersFileData, newComputerFormData):
+    print("waking computer at ", newComputerFormData["computerMACFormField"])
 
+    print("sending command: `wakeonlan ", newComputerFormData["computerMACFormField"], "`")
 
 @app.context_processor
 def utility_processor():
@@ -135,6 +138,9 @@ def index():
             # print(request.form["computerNameFormField"])
         if request.form["form_id"] == "deleteComputer":
             deleteComputer(computers, request.form)
+
+        if request.form["form_id"] == "wakeComputer":
+            wakeComputer(computers, request.form)
 
 
 

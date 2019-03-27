@@ -70,10 +70,10 @@
             <div class="card-body">
                 <div class="container">
                     <div class="row"> 
-                        <div class="col-1">
+                        <div class="col-1 statusIconDiv">
                             <span class="statusIcon fa fa-moon-o fa-2x"></span>
                             <span class="computer-ip" style="display: none;">{{ comp["ip"] }}</span>
-                            <span class="isAlive" style="display: none;">{{ comp["ip"] }}</span>
+                            <span class="isAlive" style="display: none;">{{ pingComputer(comp["ip"]) }}</span>
 
 
                         </div>
@@ -88,8 +88,8 @@
 
                                         <form id="wakeComputerForm" action="/" method="post">
                                             <input value = "{{ comp['mac'] }}" type="hidden" name="computerMACFormField">
-                                            <input value = "deleteComputer" type="hidden" name="form_id">
-                                            <button type="submit" class="cardButton btn btn-primary">Wake</button>
+                                            <input value = "wakeComputer" type="hidden" name="form_id">
+                                            <button type="submit" class="wakeButton cardButton btn btn-primary">Wake</button>
                                         </form>
 
                                     </div>
@@ -98,7 +98,7 @@
                                         <form id="deleteComputerForm" action="/" method="post">
                                             <input value = "{{ comp['mac'] }}" type="hidden" name="computerMACFormField">
                                             <input value = "deleteComputer" type="hidden" name="form_id">
-                                            <button type="submit" class="cardButton btn btn-danger">Delete</button>
+                                            <button type="submit" class="deleteButton cardButton btn btn-danger">Delete</button>
                                         </form>
 
                                     </div>
@@ -117,6 +117,52 @@
     </div>
     
     <script>
+
+        var cards = document.getElementsByClassName("card");
+
+        for (var card = 0; card < cards.length; card++){
+
+            console.log(cards[card].children[0].children[0].children[0]);
+
+            var wakeButton = cards[card].getElementsByClassName("wakeButton")[0];
+            console.log(wakeButton);
+
+
+            var iconSection = cards[card].getElementsByClassName("statusIconDiv")[0];
+            console.log(iconSection);
+            console.log(iconSection.children[2]);
+
+            // if the computer is on
+            if (iconSection.children[2].innerText == "true"){
+                if (iconSection.children[0].classList.contains("fa-moon-o")){
+                    iconSection.children[0].classList.remove("fa-moon-o");
+                }
+
+                iconSection.children[0].classList.add("fa-check-circle-o");
+
+                if (wakeButton.classList.contains("active")){
+                    wakeButton.classList.remove("active");
+                }
+                wakeButton.classList.add("disabled");
+
+            }
+            // if the computer is off
+            else {
+                if (iconSection.children[0].classList.contains("fa-check-circle-o")){
+                    iconSection.children[0].classList.remove("fa-check-circle-o");
+                }
+                iconSection.children[0].classList.add("fa-moon-o");
+
+                if (wakeButton.classList.contains("disabled")){
+                    wakeButton.classList.remove("disabled");
+                }
+                wakeButton.classList.add("active");
+            }
+
+        }
+
+
+
     </script>
     
   </body>
