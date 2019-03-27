@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, request
-import subprocess, ipaddress, json, requests
+import subprocess, ipaddress, json, time
+from wakeonlan import send_magic_packet
 from subprocess import Popen, PIPE
 app = Flask(__name__)
 
@@ -96,7 +97,13 @@ def deleteComputer(computersFileData, newComputerFormData):
 def wakeComputer(computersFileData, newComputerFormData):
     print("waking computer at ", newComputerFormData["computerMACFormField"])
 
-    print("sending command: `wakeonlan ", newComputerFormData["computerMACFormField"], "`")
+    # print("sending command: `wakeonlan ", newComputerFormData["computerMACFormField"], "`")
+
+    try:
+        send_magic_packet(newComputerFormData["computerMACFormField"])
+        time.sleep(3)
+    except:
+        print "Unexpected error:", sys.exc_info()[0]
 
 @app.context_processor
 def utility_processor():
@@ -110,17 +117,17 @@ def utility_processor():
         output = toping.communicate()[0]
         hostalive = toping.returncode
         if hostalive == 0:
-            print (ip, "is reachable")
+            # print (ip, "is reachable")
             return "true"
         else:
-            print(ip, "is unreachable")
+            # print(ip, "is unreachable")
             return "false"
         # return result
 
     return dict(format_price=format_price, pingComputer = pingComputer)
 
 
-@app.route("/", methods=['GET','POST'])
+@app.route("/", methods=['GET', 'POST'])
 def index():
 
     # selectedProject = request.args.get('project')
@@ -129,18 +136,18 @@ def index():
     #form = ReusableForm(request.form)
 
     # read in JSON data of the currently configured computers
-    computers = getComputerList()
+    # computers = getComputerList()
 
     #print form.errors
     if request.method == 'POST':
         if request.form["form_id"] == "newComputerForm":
-            submitFormData(computers, request.form)
+            submitFormData(getComputerList(), request.form)
             # print(request.form["computerNameFormField"])
         if request.form["form_id"] == "deleteComputer":
-            deleteComputer(computers, request.form)
+            deleteComputer(getComputerList(), request.form)
 
         if request.form["form_id"] == "wakeComputer":
-            wakeComputer(computers, request.form)
+            wakeComputer(getComputerList(), request.form)
 
 
 
