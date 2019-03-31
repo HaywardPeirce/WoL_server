@@ -43,7 +43,8 @@
     }
 
     #pageContent{
-        min-width:400px;
+        min-width:500px;
+        padding-left:30%;
     }
 
 
@@ -54,7 +55,7 @@
       color: #444;
       cursor: pointer;
       padding: 18px;
-      width: 100%;
+      width: 91%;
       border: none;
       text-align: left;
       outline: none;
@@ -82,95 +83,109 @@
       transform: rotate(-45deg);
       -webkit-transform: rotate(-45deg);
     }
+    @media screen and (max-width: 1100px) {
+      #pageContent {
+        padding-left:20%;
+
+      }
+    }
+    @media screen and (max-width: 800px) {
+      #pageContent {
+        padding-left:5%;
+        padding-right:5%;
+
+      }
+    }
+
 
     </style>
 
-    <div id="pageContent">
+    <div id="pageContent" class="">
 
-    <h1 style="padding-left:20px;">WoL Server</h1>
+        <h1 style="padding-left:20px;">WoL Server</h1>
 
-    <button class="accordion"><i id="accordionArrow" class="arrow" style="transform: rotate(-45deg); -webkit-transform: rotate(-45deg);"></i>&nbsp;&nbsp;Add Server</button>
+        <button class="accordion row"><i id="accordionArrow" class="arrow" style="transform: rotate(-45deg); -webkit-transform: rotate(-45deg);"></i>&nbsp;&nbsp;Add Server</button>
 
-    <div class="panel"><br></i><br>
+        <div class="panel"><br></i><br>
 
-    
-    <form id="newComputerForm" action="/" method="post">
-      <div class="form-group row">
-        <label for="colFormLabel" class="col-sm-4 col-form-label">Computer Name</label>
-        <div class="col-sm-8">
-          <input type="text" class="form-control" name="computerNameFormField" placeholder="JOHN-DESKTOP">
+
+        <form id="newComputerForm" class="" action="/" method="post">
+          <div class="form-group row">
+            <label for="colFormLabel" class="col-sm-4 col-form-label">Computer Name</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" name="computerNameFormField" placeholder="JOHN-DESKTOP">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="colFormLabel" class="col-sm-4 col-form-label">Computer IP Address</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" name="computerIPFormField" placeholder="192.168.1.43">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="colFormLabel" class="col-sm-4 col-form-label">Computer MAC Address</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" name="computerMACFormField" placeholder="00:14:22:01:23:45">
+            </div>
+          </div>
+          <input value = "newComputerForm" type="hidden" name="form_id">
+          <button type="submit" class="btn btn-primary">Save Computer</button>
+        </form>
+
         </div>
-      </div>
-      <div class="form-group row">
-        <label for="colFormLabel" class="col-sm-4 col-form-label">Computer IP Address</label>
-        <div class="col-sm-8">
-          <input type="text" class="form-control" name="computerIPFormField" placeholder="192.168.1.43">
-        </div>
-      </div>
-      <div class="form-group row">
-        <label for="colFormLabel" class="col-sm-4 col-form-label">Computer MAC Address</label>
-        <div class="col-sm-8">
-          <input type="text" class="form-control" name="computerMACFormField" placeholder="00:14:22:01:23:45">
-        </div>
-      </div>
-      <input value = "newComputerForm" type="hidden" name="form_id">
-      <button type="submit" class="btn btn-primary">Save Computer</button>
-    </form>
 
-    </div>
-
-    <div id="cards">
-        {% for comp in computers %}
-        <div class="card">
-            <div class="card-body">
-                <div class="container">
-                    <div class="row"> 
-                        <div class="col-1 statusIconDiv">
-                            <span class="statusIcon fa fa-moon-o fa-2x"></span>
-                            <span class="computer-ip" style="display: none;">{{ comp["ip"] }}</span>
-                            <span class="isAlive" style="display: none;">{{ pingComputer(comp["ip"]) }}</span>
+        <div id="cards" class="">
+            {% for comp in computers %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-1 statusIconDiv">
+                                <span class="statusIcon fa fa-moon-o fa-2x"></span>
+                                <span class="computer-ip" style="display: none;">{{ comp["ip"] }}</span>
+                                <span class="isAlive" style="display: none;">{{ pingComputer(comp["ip"]) }}</span>
 
 
-                        </div>
-                        <div class="col-6">
-                            <h5 class="card-title">{{ comp["name"] }}</h5>
-                            <p class="card-text">{{ comp["mac"] }}</p>
-                            <p class="card-text">{{ comp["ip"] }}</p>
-                        </div>
-                        <div class="col-5">
-                            <div class="container">
-                                <div class="row">
-                                    <div class="col-6">
+                            </div>
+                            <div class="col-6">
+                                <h5 class="card-title">{{ comp["name"] }}</h5>
+                                <p class="card-text">{{ comp["mac"] }}</p>
+                                <p class="card-text">{{ comp["ip"] }}</p>
+                            </div>
+                            <div class="col-5">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-6">
 
-                                        <form id="wakeComputerForm" action="/" method="post">
-                                            <input value = "{{ comp['mac'] }}" type="hidden" name="computerMACFormField">
-                                            <input value = "wakeComputer" type="hidden" name="form_id">
-                                            <button type="submit" class="wakeButton cardButton btn btn-primary">Wake</button>
-                                        </form>
+                                            <form id="wakeComputerForm" action="/" method="post">
+                                                <input value = "{{ comp['mac'] }}" type="hidden" name="computerMACFormField">
+                                                <input value = "wakeComputer" type="hidden" name="form_id">
+                                                <button type="submit" class="wakeButton cardButton btn btn-primary">Wake</button>
+                                            </form>
 
-                                    </div>
-                                    <div class="col-6">
+                                        </div>
+                                        <div class="col-6">
 
-                                        <form id="deleteComputerForm" action="/" method="post">
-                                            <input value = "{{ comp['mac'] }}" type="hidden" name="computerMACFormField">
-                                            <input value = "deleteComputer" type="hidden" name="form_id">
-                                            <button type="submit" class="deleteButton cardButton btn btn-danger">Delete</button>
-                                        </form>
+                                            <form id="deleteComputerForm" action="/" method="post">
+                                                <input value = "{{ comp['mac'] }}" type="hidden" name="computerMACFormField">
+                                                <input value = "deleteComputer" type="hidden" name="form_id">
+                                                <button type="submit" class="deleteButton cardButton btn btn-danger">Delete</button>
+                                            </form>
 
+                                        </div>
                                     </div>
                                 </div>
+
+
+
+
                             </div>
-
-
-
-
                         </div>
                     </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
     </div>
     <script>
 
