@@ -149,13 +149,6 @@ def index():
         if request.form["form_id"] == "wakeComputer":
             wakeComputer(getComputerList(), request.form)
 
-
-
-        
-
-
-
-
     return render_template('index.html', computers = getComputerList())
  
 if __name__ == "__main__":

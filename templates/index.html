@@ -135,56 +135,58 @@
         </div>
 
         <div id="cards" class="">
-            {% for comp in computers %}
-            <div class="card">
-                <div class="card-body">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-1 statusIconDiv">
-                                <span class="statusIcon fa fa-moon-o fa-2x"></span>
-                                <span class="computer-ip" style="display: none;">{{ comp["ip"] }}</span>
-                                <span class="isAlive" style="display: none;">{{ pingComputer(comp["ip"]) }}</span>
+            {% if computers %}
+                {% for comp in computers %}
+                <div class="card">
+                    <div class="card-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-1 statusIconDiv">
+                                    <span class="statusIcon fa fa-moon-o fa-2x"></span>
+                                    <span class="computer-ip" style="display: none;">{{ comp["ip"] }}</span>
+                                    <span class="isAlive" style="display: none;">{{ pingComputer(comp["ip"]) }}</span>
 
 
-                            </div>
-                            <div class="col-6">
-                                <h5 class="card-title">{{ comp["name"] }}</h5>
-                                <p class="card-text">{{ comp["mac"] }}</p>
-                                <p class="card-text">{{ comp["ip"] }}</p>
-                            </div>
-                            <div class="col-5">
-                                <div class="container">
-                                    <div class="row">
-                                        <div class="col-6">
+                                </div>
+                                <div class="col-6">
+                                    <h5 class="card-title">{{ comp["name"] }}</h5>
+                                    <p class="card-text">{{ comp["mac"] }}</p>
+                                    <p class="card-text">{{ comp["ip"] }}</p>
+                                </div>
+                                <div class="col-5">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-6">
 
-                                            <form id="wakeComputerForm" action="/" method="post">
-                                                <input value = "{{ comp['mac'] }}" type="hidden" name="computerMACFormField">
-                                                <input value = "wakeComputer" type="hidden" name="form_id">
-                                                <button type="submit" class="wakeButton cardButton btn btn-primary">Wake</button>
-                                            </form>
+                                                <form id="wakeComputerForm" action="/" method="post">
+                                                    <input value = "{{ comp['mac'] }}" type="hidden" name="computerMACFormField">
+                                                    <input value = "wakeComputer" type="hidden" name="form_id">
+                                                    <button type="submit" class="wakeButton cardButton btn btn-primary">Wake</button>
+                                                </form>
 
-                                        </div>
-                                        <div class="col-6">
+                                            </div>
+                                            <div class="col-6">
 
-                                            <form id="deleteComputerForm" action="/" method="post">
-                                                <input value = "{{ comp['mac'] }}" type="hidden" name="computerMACFormField">
-                                                <input value = "deleteComputer" type="hidden" name="form_id">
-                                                <button type="submit" class="deleteButton cardButton btn btn-danger">Delete</button>
-                                            </form>
+                                                <form id="deleteComputerForm" action="/" method="post">
+                                                    <input value = "{{ comp['mac'] }}" type="hidden" name="computerMACFormField">
+                                                    <input value = "deleteComputer" type="hidden" name="form_id">
+                                                    <button type="submit" class="deleteButton cardButton btn btn-danger">Delete</button>
+                                                </form>
 
+                                            </div>
                                         </div>
                                     </div>
+
+
+
+
                                 </div>
-
-
-
-
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            {% endfor %}
+                {% endfor %}
+            {% endif %}
         </div>
     </div>
     <script>
