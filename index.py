@@ -103,7 +103,7 @@ def wakeComputer(computersFileData, newComputerFormData):
         send_magic_packet(newComputerFormData["computerMACFormField"])
         time.sleep(3)
     except:
-        print "Unexpected error:", sys.exc_info()[0]
+        print("Unexpected error:", sys.exc_info()[0])
 
 @app.context_processor
 def utility_processor():
