@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 import subprocess, ipaddress, json, time
 from wakeonlan import send_magic_packet
 from subprocess import Popen, PIPE
@@ -105,12 +105,31 @@ def wakeComputer(computersFileData, newComputerFormData):
     except:
         print("Unexpected error:", sys.exc_info()[0])
 
+def pingComputer(ipAddress):
+    # ip = "192.168.1.140"
+    ip = str(ipAddress)
+    toping = Popen(['ping', '-c', '1', ip], stdout=PIPE)
+    output = toping.communicate()[0]
+    hostalive = toping.returncode
+
+    if hostalive == 0:
+        print (ip, "is reachable")
+        data = json.dumps({"ipaddress": ip, "isAlive": "true"})
+
+    else:
+        print(ip, "is unreachable")
+        data = json.dumps({"ipaddress": ip, "isAlive": "false"})
+
+    resp = Response(response=data, status=200, mimetype="application/json")
+    return resp
+    # return result
+
 @app.context_processor
 def utility_processor():
     def format_price(amount, currency=u'€'):
         return u'{0:.2f}{1}'.format(amount, currency)
 
-    def pingComputer(ipAddress):
+    def pingComp(ipAddress):
         # ip = "192.168.1.140"
         ip = str(ipAddress)
         toping = Popen(['ping', '-c', '1', ip], stdout=PIPE)
@@ -124,8 +143,19 @@ def utility_processor():
             return "false"
         # return result
 
-    return dict(format_price=format_price, pingComputer = pingComputer)
+    return dict(format_price=format_price, pingComputer = pingComp)
 
+#  return whether the computer with the requested IP address is awake or not
+@app.route("/ping")
+def ping():
+
+    ipAddress = request.args.get('ipAddress')
+
+    if ipAddress:
+        return pingComputer(ipAddress)
+
+    else:
+        return None
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
