@@ -9,13 +9,11 @@ app = Flask(__name__)
 def getComputerList():
 
     try:
-        with open("computers.json",'r') as computersFile:
+        with open("data/computers.json",'r') as computersFile:
             data = json.load(computersFile)
             # print(data)
 
             return data
-
-
 
     except IOError:
       print("Error: File does not appear to exist.")
@@ -69,7 +67,7 @@ def submitFormData(computersFileData, newComputerFormData):
         print(computersFileData)
 
     try:
-        with open("computers.json", 'w') as computersFile:
+        with open("data/computers.json", 'w') as computersFile:
             json.dump(computersFileData, computersFile)
             # print(data)
 
