@@ -72,7 +72,7 @@ def submitFormData(computersFileData, newComputerFormData):
             # print(data)
 
     except IOError:
-      print("Error: File does not appear to exist.")
+      print("Error: Cannot write computers to file.")
 
 def deleteComputer(computersFileData, newComputerFormData):
 
