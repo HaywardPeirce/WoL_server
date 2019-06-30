@@ -11,3 +11,5 @@ The following steps outline how to setup a linux system to run this script (base
 
 ### Usage
 Once the python virtual environment is activated, run the application using the following command from the top level of this repo: `python index.py`
+
+Note: if not running this server in a docker container, you will need to add in a `data/` folder for the `computers.json` file to be created in.
