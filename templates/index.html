@@ -191,178 +191,184 @@
         </div>
     </div>
 
-    <script>
-
-
-
-    </script>
-
-
-    <script>
-
-        //code for hiding the widget configuration section
-        var acc = document.getElementsByClassName("accordion");
-        var i;
-        for (i = 0; i < acc.length; i++) {
-          acc[i].addEventListener("click", function() {
-
-            this.classList.toggle("active");
-            var panel = this.nextElementSibling;
-
-            var accordionArrow = document.getElementById("accordionArrow");
-            if (panel.style.display === "block") {
-
-              accordionArrow.style.transform = "rotate(-45deg)";
-              accordionArrow.style.webkitTransform = "rotate(-45deg)";
-
-              panel.style.display = "none";
-            } else {
-              panel.style.display = "block";
-
-              accordionArrow.style.transform = "rotate(45deg)";
-              accordionArrow.style.webkitTransform = "rotate(45deg)";
-            }
-          });
-        }
-
-    </script>
-
-    <script>
-
-        // select all card elements
-        var cards = getCards();
-
-        //loop through each of the card elements
-        for (var card = 0; card < cards.length; card++){
-
-            // console.log(cards[card].children[0].children[0].children[0]);
-
-            // get the element for the wake button of the card
-            var wakeButton = cards[card].getElementsByClassName("wakeButton")[0];
-            // console.log(wakeButton);
-
-            // get the element for the status icon of the card
-            var iconSection = cards[card].getElementsByClassName("statusIconDiv")[0];
-            // console.log(iconSection);
-            // console.log(iconSection.children[2]);
-
-            // get the element for the IP address of the card
-            var ipAddressElement = cards[card].getElementsByClassName("computer-ip")[0];
-            // console.log(ipAddressElement);
-            // console.log(ipAddressElement.innerText);
-
-            //console.log(document.location.href);
-
-            url = document.location.href + "ping"+ "?ipAddress=" + ipAddressElement.innerText;
-
-            //console.log(url);
-
-            var request = new XMLHttpRequest()
-
-            request.open('GET', url, true)
-            request.onload = function() {
-              // Begin accessing JSON data here
-
-              console.log(this.response);
-              // console.log(typeof this.response);
-              var data = JSON.parse(this.response);
-
-              updateAliveStatus(data["ipaddress"], data["isAlive"]);
-
-              
-            }
-
-            request.send()
-
-
-
-        }
     
-    // get a list of card elements
-    function getCards(){
+    
+  </body>
+</html>
 
-      // select all card elements
-      return document.getElementsByClassName("card");
+<script>
 
+    var statusUpdateTimers = new Object();
+
+    //code for hiding the widget configuration section
+    var acc = document.getElementsByClassName("accordion");
+    var i;
+    for (i = 0; i < acc.length; i++) {
+      acc[i].addEventListener("click", function() {
+
+        this.classList.toggle("active");
+        var panel = this.nextElementSibling;
+
+        var accordionArrow = document.getElementById("accordionArrow");
+        if (panel.style.display === "block") {
+
+          accordionArrow.style.transform = "rotate(-45deg)";
+          accordionArrow.style.webkitTransform = "rotate(-45deg)";
+
+          panel.style.display = "none";
+        } else {
+          panel.style.display = "block";
+
+          accordionArrow.style.transform = "rotate(45deg)";
+          accordionArrow.style.webkitTransform = "rotate(45deg)";
+        }
+      });
     }
 
-    function getIconSectionByIP(ip2lookup){
+    // select all card elements
+    var cards = getCards();
 
-      var cards = getCards();
-
-      //loop through each of the card elements
-      for (var card = 0; card < cards.length; card++){
+    //loop through each of the card elements
+    for (var card = 0; card < cards.length; card++){
 
         // console.log(cards[card].children[0].children[0].children[0]);
+
+        // get the element for the wake button of the card
+        var wakeButton = cards[card].getElementsByClassName("wakeButton")[0];
+        // console.log(wakeButton);
+
+        // get the element for the status icon of the card
+        var iconSection = cards[card].getElementsByClassName("statusIconDiv")[0];
+        // console.log(iconSection);
+        // console.log(iconSection.children[2]);
 
         // get the element for the IP address of the card
         var ipAddressElement = cards[card].getElementsByClassName("computer-ip")[0];
         // console.log(ipAddressElement);
-        console.log(ipAddressElement.innerText);
-        var ipAddress = ipAddressElement.innerText;
+        // console.log(ipAddressElement.innerText);
 
-        // if this is the card with the correct IP address
-        if (ipAddress == ip2lookup){
+        //console.log(document.location.href);
 
-          // get the element for the wake button of the card
-          var wakeButton = cards[card].getElementsByClassName("wakeButton")[0];
-          // console.log(wakeButton);
+        //code for `getPingStatus` was here
+        getPingStatus(ipAddressElement);
 
-          // get the element for the status icon of the card
-          var iconSection = cards[card].getElementsByClassName("statusIconDiv")[0];
-          // console.log(iconSection);
-          // console.log(iconSection.children[2]);
-
-          return [iconSection, wakeButton];
-
-        }
-      }
-      
-      return null;
+        statusUpdateTimers[ipAddressElement.innerText] = setInterval(function() { getPingStatus(ipAddressElement); }, 30000);
 
     }
 
+// TODO: function to recheck the alive status of each card every X seconds
+// TODO: how to make sure to recheck the status of each card on the page (needs IP passed in)
+// var timer = setInterval(function() { tick(); }, 1000);
 
-    //function to update whether icon and wake button based on whether a computer is awake or not
-    function updateAliveStatus(ipAddress, isAliveStatus){
+// function to make API call to lookup ping response
 
-      var cardSections = getIconSectionByIP(ipAddress);
+function getPingStatus(ipAddressElement){
 
-      var iconSection = cardSections[0];
-      var wakeButton = cardSections[1];
+    url = document.location.href + "ping"+ "?ipAddress=" + ipAddressElement.innerText;
 
-        // if the computer is on
-        if (isAliveStatus == "true"){
-            console.log("Computer `" + ipAddress +"` is alive");
+    //console.log(url);
 
-            console.log(iconSection);
-            console.log(iconSection.children[2]);
+    var request = new XMLHttpRequest()
 
-            iconSection.children[0].classList.remove("fa-spinner", "fa-moon-o", "fa-check-circle-o", "fa-pulse" );
+    request.open('GET', url, true)
+    request.onload = function() {
+        // Begin accessing JSON data here
 
-            iconSection.children[0].classList.add("fa-check-circle-o");
+        console.log(this.response);
+        // console.log(typeof this.response);
+        var data = JSON.parse(this.response);
 
-            wakeButton.classList.remove("active");
-            wakeButton.classList.add("disabled");
-
-        }
-        // if the computer is off
-        else {
-            console.log("Computer `" + ipAddress +"` is asleep");
-
-            console.log(iconSection);
-            console.log(iconSection.children[2]);
-
-            iconSection.children[0].classList.remove("fa-spinner", "fa-check-circle-o", "fa-moon-o", "fa-pulse" );
-            iconSection.children[0].classList.add("fa-moon-o");
-
-            wakeButton.classList.remove("disabled");
-            wakeButton.classList.add("active");
-        }
-
-    }
-
-    </script>
+        updateAliveStatus(data["ipaddress"], data["isAlive"]);
     
-  </body>
-</html>
+    }
+
+    request.send()
+
+}
+
+
+// get a list of card elements
+function getCards(){
+
+  // select all card elements
+  return document.getElementsByClassName("card");
+
+}
+
+function getIconSectionByIP(ip2lookup){
+
+  var cards = getCards();
+
+  //loop through each of the card elements
+  for (var card = 0; card < cards.length; card++){
+
+    // console.log(cards[card].children[0].children[0].children[0]);
+
+    // get the element for the IP address of the card
+    var ipAddressElement = cards[card].getElementsByClassName("computer-ip")[0];
+    // console.log(ipAddressElement);
+    console.log(ipAddressElement.innerText);
+    var ipAddress = ipAddressElement.innerText;
+
+    // if this is the card with the correct IP address
+    if (ipAddress == ip2lookup){
+
+      // get the element for the wake button of the card
+      var wakeButton = cards[card].getElementsByClassName("wakeButton")[0];
+      // console.log(wakeButton);
+
+      // get the element for the status icon of the card
+      var iconSection = cards[card].getElementsByClassName("statusIconDiv")[0];
+      // console.log(iconSection);
+      // console.log(iconSection.children[2]);
+
+      return [iconSection, wakeButton];
+
+    }
+  }
+  
+  return null;
+
+}
+
+
+//function to update whether icon and wake button based on whether a computer is awake or not
+function updateAliveStatus(ipAddress, isAliveStatus){
+
+  var cardSections = getIconSectionByIP(ipAddress);
+
+  var iconSection = cardSections[0];
+  var wakeButton = cardSections[1];
+
+    // if the computer is on
+    if (isAliveStatus == "true"){
+        console.log("Computer `" + ipAddress +"` is alive");
+
+        console.log(iconSection);
+        console.log(iconSection.children[2]);
+
+        iconSection.children[0].classList.remove("fa-spinner", "fa-moon-o", "fa-check-circle-o", "fa-pulse" );
+
+        iconSection.children[0].classList.add("fa-check-circle-o");
+
+        wakeButton.classList.remove("active");
+        wakeButton.classList.add("disabled");
+
+    }
+    // if the computer is off
+    else {
+        console.log("Computer `" + ipAddress +"` is asleep");
+
+        console.log(iconSection);
+        console.log(iconSection.children[2]);
+
+        iconSection.children[0].classList.remove("fa-spinner", "fa-check-circle-o", "fa-moon-o", "fa-pulse" );
+        iconSection.children[0].classList.add("fa-moon-o");
+
+        wakeButton.classList.remove("disabled");
+        wakeButton.classList.add("active");
+    }
+
+}
+
+</script>
