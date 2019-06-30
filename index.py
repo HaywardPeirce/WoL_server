@@ -67,7 +67,7 @@ def submitFormData(computersFileData, newComputerFormData):
         print(computersFileData)
 
     try:
-        with open("data/computers.json", 'w') as computersFile:
+        with open("data/computers.json", 'w+') as computersFile:
             json.dump(computersFileData, computersFile)
             # print(data)
 
@@ -85,7 +85,7 @@ def deleteComputer(computersFileData, newComputerFormData):
     print(computersFileData)
 
     try:
-        with open("computers.json", 'w') as computersFile:
+        with open("data/computers.json", 'w') as computersFile:
             json.dump(computersFileData, computersFile)
             # print(data)
 
