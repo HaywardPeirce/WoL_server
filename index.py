@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, Response
 import subprocess, ipaddress, json, time
 from wakeonlan import send_magic_packet
 from subprocess import Popen, PIPE
-app = Flask(__name__)
+application = Flask(__name__)
 
 # read in JSON data of the currently configured computers
 def getComputerList():
@@ -122,7 +122,7 @@ def pingComputer(ipAddress):
     return resp
     # return result
 
-@app.context_processor
+@application.context_processor
 def utility_processor():
     def format_price(amount, currency=u'€'):
         return u'{0:.2f}{1}'.format(amount, currency)
@@ -144,7 +144,7 @@ def utility_processor():
     return dict(format_price=format_price, pingComputer = pingComp)
 
 #  return whether the computer with the requested IP address is awake or not
-@app.route("/ping")
+@application.route("/ping")
 def ping():
 
     ipAddress = request.args.get('ipAddress')
@@ -155,7 +155,7 @@ def ping():
     else:
         return None
 
-@app.route("/", methods=['GET', 'POST'])
+@application.route("/", methods=['GET', 'POST'])
 def index():
 
     # selectedProject = request.args.get('project')
@@ -180,4 +180,4 @@ def index():
     return render_template('index.html', computers = getComputerList())
  
 if __name__ == "__main__":
-    app.run(port=5000, threaded=True, host=('0.0.0.0'))
+    application.run(port=5000, threaded=True, host=('0.0.0.0'))
