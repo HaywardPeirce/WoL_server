@@ -3,96 +3,163 @@ from flask import Flask, render_template, request, Response
 import subprocess, ipaddress, json, time
 from wakeonlan import send_magic_packet
 from subprocess import Popen, PIPE
+import nmap
+nm = nmap.PortScanner()
+
 application = Flask(__name__)
 
-# read in JSON data of the currently configured computers
-def getComputerList():
+hostList = []
+
+class Hosts:
+    def __init__(self, name, type, ipv4, mac, state, reason):
+        self.name = name
+        self.type = type
+        self.ipv4 = ipv4
+        self.mac = mac
+        self.state = state
+        self.reason = reason
+        self.enabled = None
+
+    def update(self, name, ip, mac):
+        print("")
+        self.name = name
+        self.ipv4 = ip
+        self.mac = mac
+
+# use nmap and the local file to update the list of configured and available hosts on the network
+def updateComputers():
+    scanForHosts()
+
+    readComputerFileList()
+
+
+
+# scan the network for hosts and add them to the global object
+def scanForHosts():
+
+    global hostList
+
+    # TODO: support different IP address format
+    nm.scan(hosts='192.168.1.0/24', arguments='-sn', sudo=True)
+
+    for x in nm.all_hosts():
+        # print(x, nm[x])
+
+        temp = nm[x]
+
+        # hostList.append(Hosts(nm[x]))
+        hostList.append(Hosts(nm[x].get('hostnames',{})[0].get('name'), nm[x].get('hostnames',{})[0].get('type'), nm[x].get('addresses',{}).get('ipv4'), nm[x].get('addresses',{}).get('mac'), nm[x].get('status',{}).get('state'), nm[x].get('status',{}).get('reason')))
+
+# return the host object based on a given IP address
+def getComputer(ip = None, mac = None):
+
+    # if neither ip address or mac address are passed in, then return nothing
+    if not ip and not mac:
+        return None
+
+    global hostList
+
+    for host in hostList:
+
+        if ip and mac:
+            # TODO: should this be an and or an or? what to do if there is one computer with the requested mac, and one with the requested IP?
+            # probably use an or as a mismatch will mean the wake wont work
+            if host.ipv4 == ip or host.mac == mac:
+                return host
+
+        if ip:
+            if host.ipv4 == ip:
+                return host
+        
+        if mac:
+            if host.mac == mac:
+                return host
+    
+    return None
+
+
+
+# read in JSON data from the file of the defined configured computers
+def readComputerFileList():
+
+    global hostList
 
     try:
-        with open("../data/computers.json",'r') as computersFile:
+        # TODO: support different file location
+        with open("./data/computers.json",'r') as computersFile:
             data = json.load(computersFile)
-            # print(data)
+            print(data)
 
-            return data
+            # return data
 
-    except IOError:
-      print("Error: File does not appear to exist.")
+            for computer in data:
+
+                # TODO: how to handle cases where entries are missing certain values. Are these passed in as None?
+                hostList.append( Hosts(computer['name'], computer['type'], computer['ipv4'], computer['mac'], computer['state'], computer['reason']))
+
+    except IOError as e:
+      print("Error: File does not appear to exist. ", e)
       return None
 
-def submitFormData(computersFileData, newComputerFormData):
+def saveComputersList():
+    print("")
 
-    # if there is no existing computer data
-    if computersFileData == None:
+# format the computer information to be in a format that's readable for the page template
+def formatComputers():
+    global hostList
 
-        # computersFileData = [
-        # {"name":"JOHN-DESKTOP",
-        #         "ip":"192.168.1.43",
-        #              "mac":"00-14-22-01-23-45"
-        # }]
+    computers = []
 
-        computersFileData = [
-            {"name": newComputerFormData["computerNameFormField"],
-             "ip": newComputerFormData["computerIPFormField"],
-             "mac": newComputerFormData["computerMACFormField"]
-             }]
+    for host in hostList:
 
+        # TODO: filter only enabled computers
+        temp = {}
+        temp['name'] = host.name
+        temp['ip'] = host.ipv4
+        temp['mac'] = host.mac
+        temp['enabled'] = host.enabled
+        temp['state'] = host.state
 
+        computers.append(temp)
 
-    # if there is already computer data
+    return computers
+
+# read in JSON data of the currently configured computers
+# def getComputerList():
+
+#     try:
+#         with open("./data/computers.json",'r') as computersFile:
+#             data = json.load(computersFile)
+#             print(data)
+
+#             return data
+
+#     except IOError:
+#       print("Error: File does not appear to exist.")
+#       return None
+
+# add the submitted computer information to the file of configured computers
+def submitFormData(newComputerFormData):
+
+    global hostList
+
+    # if there is already a computer with this information, then either do nothing or update it
+    if getComputer(newComputerFormData["computerIPFormField"], newComputerFormData["computerMACFormField"]):
+        print("there is already a computer with this IP or MAC...") 
+    
+        getComputer(newComputerFormData["computerIPFormField"], newComputerFormData["computerMACFormField"]).update(newComputerFormData["computerNameFormField"], newComputerFormData["computerIPFormField"], newComputerFormData["computerMACFormField"])
     else:
+        hostList.append(Hosts(newComputerFormData["computerNameFormField"], newComputerFormData["computerIPFormField"], newComputerFormData["computerMACFormField"]))
 
-        # check if the current entry is already a saved entry
+    saveComputersList()
 
-        isNewEntry = True
+def deleteComputer(newComputerFormData):
 
-        for comp in computersFileData:
+    global hostList
 
-            # if there is already a configured entry with this MAC address, then just update the name and IP
-            if comp["mac"] == newComputerFormData["computerMACFormField"]:
-                isNewEntry = False
+    hostList.remove(getComputer(newComputerFormData["computerIPFormField"], newComputerFormData["computerMACFormField"]))
 
-                comp["name"] = newComputerFormData["computerNameFormField"]
-                comp["ip"] = newComputerFormData["computerIPFormField"]
-
-        # if it really is a new entry, append the new entry to the exising JSON object
-        if isNewEntry:
-            computersFileData.append(
-                {
-                    "name": newComputerFormData["computerNameFormField"],
-                    "ip": newComputerFormData["computerIPFormField"],
-                    "mac": newComputerFormData["computerMACFormField"]
-                }
-            )
-
-        print(computersFileData)
-
-    try:
-        with open("../data/computers.json", 'w+') as computersFile:
-            json.dump(computersFileData, computersFile)
-            # print(data)
-
-    except IOError:
-      print("Error: Cannot write computers to file.")
-
-def deleteComputer(computersFileData, newComputerFormData):
-
-    for comp in computersFileData:
-
-        # if this is the computer that is marked to be deleted, remove it from the list
-        if comp["mac"] == newComputerFormData["computerMACFormField"]:
-            computersFileData.remove(comp)
-
-    print(computersFileData)
-
-    try:
-        with open("../data/computers.json", 'w') as computersFile:
-            json.dump(computersFileData, computersFile)
-            # print(data)
-
-    except IOError:
-      print("Error: File does not appear to exist.")
-
-def wakeComputer(computersFileData, newComputerFormData):
+def wakeComputer(newComputerFormData):
     print("waking computer at ", newComputerFormData["computerMACFormField"])
 
     # print("sending command: `wakeonlan ", newComputerFormData["computerMACFormField"], "`")
@@ -103,25 +170,26 @@ def wakeComputer(computersFileData, newComputerFormData):
     except:
         print("Unexpected error:", sys.exc_info()[0])
 
-def pingComputer(ipAddress):
+def pingComputer(host):
     # ip = "192.168.1.140"
-    ip = str(ipAddress)
-    toping = Popen(['ping', '-c', '1', ip], stdout=PIPE)
+    # ip = host.ipv4
+    toping = Popen(['ping', '-c', '1', host.ipv4], stdout=PIPE)
     output = toping.communicate()[0]
     hostalive = toping.returncode
 
     if hostalive == 0:
-        print (ip, "is reachable")
-        data = json.dumps({"ipaddress": ip, "isAlive": "true"})
+        print (host.ipv4, "is reachable")
+        data = json.dumps({"ipaddress": host.ipv4, "isAlive": "true"})
 
     else:
-        print(ip, "is unreachable")
-        data = json.dumps({"ipaddress": ip, "isAlive": "false"})
+        print(host.ipv4, "is unreachable")
+        data = json.dumps({"ipaddress": host.ipv4, "isAlive": "false"})
 
     resp = Response(response=data, status=200, mimetype="application/json")
     return resp
     # return result
 
+# makes functions contained here available to all templates
 @application.context_processor
 def utility_processor():
     def format_price(amount, currency=u'€'):
@@ -143,41 +211,48 @@ def utility_processor():
 
     return dict(format_price=format_price, pingComputer = pingComp)
 
+#  return a list of the hosts on the network
+@application.route("/hosts")
+def hostsRoute():
+
+    return formatComputers()
+
 #  return whether the computer with the requested IP address is awake or not
-@application.route("/ping")
+@app.route("/ping")
 def ping():
 
     ipAddress = request.args.get('ipAddress')
-
     if ipAddress:
-        return pingComputer(ipAddress)
+        temp = getComputer(ip = ipAddress)
+
+        return pingComputer(getComputer(ip = ipAddress))
 
     else:
         return None
 
-@application.route("/", methods=['GET', 'POST'])
+@app.route("/", methods=['GET', 'POST'])
 def index():
+
+    updateComputers()
 
     # selectedProject = request.args.get('project')
     
     #TODO: add in validation from here https://pythonspot.com/flask-web-forms/ or here https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iii-web-forms
     #form = ReusableForm(request.form)
 
-    # read in JSON data of the currently configured computers
-    # computers = getComputerList()
-
     #print form.errors
     if request.method == 'POST':
         if request.form["form_id"] == "newComputerForm":
-            submitFormData(getComputerList(), request.form)
+            submitFormData(request.form)
             # print(request.form["computerNameFormField"])
         if request.form["form_id"] == "deleteComputer":
-            deleteComputer(getComputerList(), request.form)
+            deleteComputer(request.form)
 
         if request.form["form_id"] == "wakeComputer":
-            wakeComputer(getComputerList(), request.form)
+            wakeComputer(request.form)
 
-    return render_template('index.html', computers = getComputerList())
+    # Return the index template and a formatted list of computers when the page is initially loaded/not called using a POST request
+    return render_template('index.html', computers = formatComputers())
  
 if __name__ == "__main__":
-    application.run(port=5000, threaded=True, host=('0.0.0.0'))
+    app.run(port=5000, threaded=True, host=('0.0.0.0'))
